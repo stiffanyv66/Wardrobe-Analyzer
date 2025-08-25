@@ -1,3 +1,14 @@
+   //THINGS TO IMPLEMENT:
+   /*
+   1) Changed weather implementation - use a weather API to get real-time weather data based on user location.
+   2) Color harmony checker - implement a function to check if selected colors are complementary or clash.
+   3) Usage tracking and recommendations - track how often each item is worn and suggest items that haven't been worn recently.
+    4) Enhanced outfit generation with seasonal considerations - ensure outfits are appropriate for the current season.
+    5)
+   */
+   
+   
+   
    // Wardrobe data storage
         let wardrobe = [];
         let nextId = 1;
