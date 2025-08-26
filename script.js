@@ -6,6 +6,9 @@
     4) Enhanced outfit generation with seasonal considerations - ensure outfits are appropriate for the current season.
     5)
    */
+
+
+    //SO THIS IS A LITTLE UGLY BUT IT WORKS FOR NOW
    
    
    
