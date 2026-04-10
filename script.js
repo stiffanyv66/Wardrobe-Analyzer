@@ -8,8 +8,12 @@
    */
 
 
-    //SO THIS IS A LITTLE UGLY BUT IT WORKS FOR NOW
-   
+    //button hover effects are not consistent across all buttons
+    //the colors are ugly 
+    //the panel heights are still wrong - they are too short
+    //get outfit suggestions button is so ugly and huge
+   //color coordination section is dumb
+   //want a little box that shows the outfits in the seocnd panel
    
    
    // Wardrobe data storage
