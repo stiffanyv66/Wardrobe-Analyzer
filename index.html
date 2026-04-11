@@ -132,10 +132,12 @@
 
             <div class="panel">
                 <h2>Outfit Suggestions</h2>
-                <div class="Weather widget">
+                <div class="Weather widget"> <!-- implement weather logic pls-->
                     <h3>Today's Weather</h3>
-                    <p>72 degress Farenheight - Partly Cloudy</p>
-                    <p>Perfect for light layers</p>
+                    <div id="weather-info" > <!-- eventually make this load immediately but button is okay-->
+                        <a href="javascript:displayWeatherSuggestions()">Click Here</a>
+
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -150,10 +152,11 @@
                     </select>
             </div>
 
-            <button class="btn btn-secondary" id="suggestOutfitBtn">Get Outfit Suggestion</button>
+            <button onclick="getOutfitSuggestion()" class="btn btn-secondary" id="suggestOutfitBtn">Get Outfit Suggestion</button>
 
             <div id="outfitSuggestions">
                 <!--Outfit suggestions here but I dont wanna do it right now-->
+                    
             </div>
 
             <div style="margin-top: 30px;">

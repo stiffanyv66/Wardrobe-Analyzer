@@ -3,6 +3,7 @@
             background-color: rgba(198, 148, 241, 0.666);
             color: #313030;
             line-height: 1.6;
+
         }
 
         .container {
@@ -28,10 +29,10 @@
         }
 
         .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 5px;
-            margin-bottom: 0;
+            display: flex;
+  flex-direction: column; /* stack vertically */
+  gap: 20px; /* optional spacing */
+
         }
 
         .panel {
@@ -43,6 +44,8 @@
             border: 1px solid rgba(255,255,255,0.2);
             height: 100%;
             display: flex;
+  flex-direction: column; /* stack vertically */
+  gap: 20px; /* optional spacing */
         }
 
         .panel h2 {

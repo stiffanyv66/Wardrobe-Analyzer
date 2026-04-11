@@ -13,8 +13,30 @@
     //the panel heights are still wrong - they are too short
     //get outfit suggestions button is so ugly and huge
    //color coordination section is dumb
-   //want a little box that shows the outfits in the seocnd panel
+   //want a little box that shows  outfits in the seocnd panel
    
+//implementing weather API - using OpenWeatherMap API
+async function getWeather() {
+    const apiKey = '22fafa86b0906c75bb9cd83a592aa5a7';
+
+    const response = await fetch(
+    `https://api.openweathermap.org/data/2.5/weather?q=Chicago&appid=${apiKey}&units=imperial`);
+
+
+    const data = await response.json();
+    
+    return{
+        temperature: data.main.temp,
+        condition: data.weather[0].main.toLowerCase()
+    };
+
+}
+
+
+
+
+
+
    
    // Wardrobe data storage
         let wardrobe = [];
@@ -373,6 +395,13 @@
             }
             
             return suggestions;
+        }
+
+        async function displayWeatherSuggestions() {
+            const weather = await getWeather();
+
+            document.getElementById("weather-info").innerText =
+            '' + weather.temperature + '°F - ' + weather.condition.charAt(0).toUpperCase() + weather.condition.slice(1);
         }
 
         // Color harmony checker
