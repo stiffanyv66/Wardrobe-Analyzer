@@ -342,4 +342,24 @@
             .filters {
                 justify-content: center;
             }
+
+            .outfit-items {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.outfit-item {
+  text-align: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.outfit-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+}
         }

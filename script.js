@@ -59,7 +59,7 @@ async function getWeather() {
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
-            loadWardrobe();
+            //loadWardrobe();
             setupEventListeners();
             updateStats();
         });
@@ -298,32 +298,17 @@ async function getWeather() {
             // Display suggestion
             const suggestionHTML = `
                 <div class="outfit-suggestion">
-                    <h3>✨ Perfect for ${occasion}!</h3>
                     <div class="outfit-items">
+                    <p>Suggested outfit!!</p>
                         ${outfit.map(item => 
-                            `<div class="outfit-item">${item.name}<br><small>${item.category}</small></div>`
+                            `<div class="outfit-item">${item.name}<br><small>${item.category} • ${item.color}</small></div>`
                         ).join('')}
                     </div>
-                    <p style="margin-top: 15px; font-size: 0.9rem;">
-                        💡 This combination uses complementary colors for a harmonious look!
-                    </p>
                 </div>
             `;
 
             document.getElementById('outfitSuggestions').innerHTML = suggestionHTML;
         }
-
-        function saveWardrobe() {
-            // Note: In a real app, this would save to a server
-            // For demo purposes, we're using memory storage only
-        }
-
-        function loadWardrobe() {
-            // Note: In a real app, this would load from a server
-            // For demo purposes, we start with an empty wardrobe
-            displayWardrobe();
-        }
-
         // Add some sample data for demonstration
         window.addSampleData = function() {
             const sampleItems = [
