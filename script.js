@@ -33,11 +33,6 @@ async function getWeather() {
 }
 
 
-
-
-
-
-   
    // Wardrobe data storage
         let wardrobe = [];
         let nextId = 1;
@@ -139,7 +134,7 @@ async function getWeather() {
                 wornCount: 0
             };
 
-            if (!formData.name || !formData.category || !formData.color || !formData.season) {
+            if (!formData.category || !formData.color || !formData.season) {
                 alert('Please fill in all fields');
                 return;
             }
@@ -242,8 +237,14 @@ async function getWeather() {
             document.getElementById('recentlyWorn').textContent = recentlyWorn;
         }
 
-        function generateOutfitSuggestion() {
+        async function generateOutfitSuggestion() {
+
+
             const occasion = document.getElementById('occasion').value;
+            const priority = document.getElementById('priority').value;
+            const Weather = document.getElementById('weather-info');
+            const weatherText = Weather.dataset.weather || 'unknown';
+
             const availableItems = wardrobe.filter(item => {
                 // Don't suggest recently worn items
                 const recentlyWorn = item.lastWorn && 
@@ -251,65 +252,93 @@ async function getWeather() {
                 return !recentlyWorn;
             });
 
+
+
+            //not enough items to make outfit bruh
             if (availableItems.length < 2) {
                 document.getElementById('outfitSuggestions').innerHTML = 
                     '<p>Add more items to your wardrobe for better suggestions!</p>';
                 return;
             }
 
-            // Simple outfit generation logic
-            const tops = availableItems.filter(item => item.category === 'tops');
-            const bottoms = availableItems.filter(item => item.category === 'bottoms');
-            const outerwear = availableItems.filter(item => item.category === 'outerwear');
-            const shoes = availableItems.filter(item => item.category === 'shoes');
 
-            let outfit = [];
             
-            // Pick a top
-            if (tops.length > 0) {
-                const randomTop = tops[Math.floor(Math.random() * tops.length)];
-                outfit.push(randomTop);
-                
-                // Pick matching bottom
-                if (bottoms.length > 0) {
-                    const matchingBottoms = bottoms.filter(bottom => 
-                        colorCombinations[randomTop.color] && 
-                        colorCombinations[randomTop.color].includes(bottom.color)
-                    );
-                    
-                    const bottomsToChooseFrom = matchingBottoms.length > 0 ? matchingBottoms : bottoms;
-                    const randomBottom = bottomsToChooseFrom[Math.floor(Math.random() * bottomsToChooseFrom.length)];
-                    outfit.push(randomBottom);
-                }
-                
-                // Add outerwear for work/formal occasions
-                if ((occasion === 'work' || occasion === 'formal') && outerwear.length > 0) {
-                    const randomOuterwear = outerwear[Math.floor(Math.random() * outerwear.length)];
-                    outfit.push(randomOuterwear);
-                }
-                
-                // Add shoes
-                if (shoes.length > 0) {
-                    const randomShoes = shoes[Math.floor(Math.random() * shoes.length)];
-                    outfit.push(randomShoes);
-                }
-            }
 
-            // Display suggestion
-            const suggestionHTML = `
-                <div class="outfit-suggestion">
-                    <div class="outfit-items">
-                    <p>Suggested outfit!!</p>
-                        ${outfit.map(item => 
-                            `<div class="outfit-item">${item.name}<br><small>${item.category} • ${item.color}</small></div>`
-                        ).join('')}
-                    </div>
+            //claude integration mayhaps - rough idea right now 
+            const currentMonth = new Date().getMonth();
+            let seasons = ['spring', 'summer', 'fall', 'winter'][Math.floor(currentMonth / 3)];
+            const currentSeason = seasons[currentMonth];
+
+
+            const prompt = buildPrompt({priority, occasion, currentSeason, weatherText});
+
+            const container = document.getElementById('outfitSuggestions');
+            container.innerHTML = '<p>Get excited...</p>';
+
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 1000,
+                    messages: [{ role: 'user', content: prompt }]
+                })
+                });
+            
+            const data = await response.json();
+            const text = data.content.map(b => b.text).join('');
+
+            renderSuggestion(text, container);
+            }
+            catch (error) {
+                container.innerHTML= '<p> Sorry, try again later! </p>';
+                console.error(err);
+            }
+        }
+
+
+        function buildPrompt({priority, occasion, currentSeason, weatherText}) {
+            const Wardrobesum = wardrobe.map(item => `${item.name} (${item.category}, ${item.color}, ${item.season})`).join('\n');
+
+            const contextParts =[];
+            if (priority) contextParts.push(`Priority: ${priority}.`);
+            if (occasion) contextParts.push(`Occasion: ${occasion}.`);
+            if (currentSeason) contextParts.push(`Season: ${currentSeason}.`);
+            if (weatherText) contextParts.push(`Weather: ${weatherText}.`);
+
+            return `You are a fashion assistant. Based on the following wardrobe items:\n${Wardrobesum}\n\nAnd the context: ${contextParts.join(' ')}\n\nSuggest a stylish outfit that fits the occasion and weather. Explain your choices briefly.`;
+
+        }
+
+        function renderSuggestion(text, container) {
+            const outfit = text.match(/OUTFIT:\s*(.+)/);
+            const whyMatch = text.match(/WHY:\s*([\s\S]+)/);
+                
+            const pieces = outfit ? outfit[1].split(',').map(s => s.trim()) : [];
+            const why = whyMatch ? whyMatch[1].trim() : text;
+
+            const items = pieces.map(name => {
+                const found = wardrobe.find(i => i.name.toLowerCase() === name.toLowerCase());
+                return `<div style="background:rgba(255,255,255,0.08); border:1px solid rgba(0,0,0,0.1); border-radius:8px; padding:10px 14px; font-size:0.9rem;">
+                ${found ? `<strong>${found.name}</strong><br><span style="font-size:0.8rem; color:#888;">${found.category} · ${found.color} · ${found.season}</span>` : `<strong>${name}</strong>`}
+                </div>`;
+            }).join('');
+
+             container.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+                <p style="font-size:0.85rem; color:#888; margin:0;">Suggested outfit</p>
+                <div style="display:flex; flex-direction:column; gap:6px;">${itemCards}</div>
+                <div style="border-left: 3px solid #a78bfa; padding-left: 12px; margin-top:6px; font-size:0.9rem; color:#555; line-height:1.5;">
+                    ${why}
+                </div>
                 </div>
             `;
+            }
 
-            document.getElementById('outfitSuggestions').innerHTML = suggestionHTML;
-        }
-        // Add some sample data for demonstration
+
+        // some random sample data 
         window.addSampleData = function() {
             const sampleItems = [
                 {
@@ -362,32 +391,24 @@ async function getWeather() {
             document.querySelector('.panel').appendChild(demoButton);
         }, 1000);
 
-        // Advanced outfit suggestions based on weather and occasion
-        function getWeatherBasedSuggestions(temperature, condition) {
-            let suggestions = [];
-            
-            if (temperature < 50) {
-                suggestions = wardrobe.filter(item => 
-                    item.category === 'outerwear' || 
-                    (item.season === 'winter' || item.season === 'all')
-                );
-            } else if (temperature > 80) {
-                suggestions = wardrobe.filter(item => 
-                    item.category === 'tops' && 
-                    (item.season === 'summer' || item.season === 'all') &&
-                    ['white', 'yellow', 'blue'].includes(item.color)
-                );
-            }
-            
-            return suggestions;
-        }
+
+
+        
+
 
         async function displayWeatherSuggestions() {
             const weather = await getWeather();
 
-            document.getElementById("weather-info").innerText =
-            '' + weather.temperature + '°F - ' + weather.condition.charAt(0).toUpperCase() + weather.condition.slice(1);
+            const text = '$(weather.temperature)°F and $(weather.condition)';
+
+            const el = document.getElementById('weather-info');
+            el.textContent = text;
+            el.dataset.weather = text;
         }
+
+
+
+
 
         // Color harmony checker
         function checkColorHarmony(color1, color2) {
