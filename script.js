@@ -1,7 +1,5 @@
 //Work on :
-    //laundry and usage reminders are not working without set interval
-
-
+    //laundry reminders are not working?? me thinks??
 
 //implementing weather API - using OpenWeatherMap API
 async function getWeather() {
@@ -225,12 +223,8 @@ function handleFiles(files) {
 
         async function generateOutfitSuggestion() {
 
-            
-
-
 
             const occasion = document.getElementById('occasion').value;
-            const priority = document.getElementById('priority').value;
             const Weather = document.getElementById('weather-info');
             const weatherText = Weather.dataset.weather || 'unknown';
 
@@ -251,15 +245,13 @@ function handleFiles(files) {
             }
 
 
-            
-
             //claude integration mayhaps - rough idea right now 
             const currentMonth = new Date().getMonth();
-            let seasons = ['spring', 'summer', 'fall', 'winter'][Math.floor(currentMonth / 3)];
-            const currentSeason = seasons[currentMonth];
+            const seasonList = ['winter','winter','spring','spring','spring','summer','summer','summer','fall','fall','fall','winter'];
+            const currentSeason = seasonList[currentMonth];
 
 
-            const prompt = buildPrompt({priority, occasion, currentSeason, weatherText});
+            const prompt = buildPrompt({occasion, currentSeason, weatherText});
 
             const container = document.getElementById('outfitSuggestions');
             container.innerHTML = '<p>Get excited...</p>';
@@ -403,15 +395,6 @@ renderSuggestion(text, container);
             document.querySelector('.panel').appendChild(demoButton);
         }, 1000);
 
-
-
-        
-
-
-
-
-
-
         async function displayWeatherSuggestions() {
             const weather = await getWeather();
 
@@ -427,30 +410,6 @@ renderSuggestion(text, container);
 
            // el.textContent = text;
             el.dataset.weather = text;
-        }
-
-
-
-
-
-
-
-
-
-        // Color harmony checker
-        function checkColorHarmony(color1, color2) {
-            const complementary = {
-                'red': ['green', 'white', 'black'],
-                'blue': ['orange', 'yellow', 'white'],
-                'green': ['red', 'brown', 'white'],
-                'yellow': ['purple', 'blue', 'black'],
-                'purple': ['yellow', 'green', 'white'],
-                'orange': ['blue', 'purple', 'brown']
-            };
-            
-            return complementary[color1]?.includes(color2) || 
-                   complementary[color2]?.includes(color1) ||
-                   color1 === color2;
         }
 
         // Usage tracking and recommendations
@@ -546,38 +505,3 @@ renderSuggestion(text, container);
             );
             displayWardrobe(results);
         };
-
-        // Outfit planning for the week
-        window.planWeeklyOutfits = function() {
-            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-            const weekPlan = document.createElement('div');
-            weekPlan.innerHTML = '<h3>📅 Weekly Outfit Plan</h3>';
-            
-            days.forEach(day => {
-                const dayOutfit = generateRandomOutfit();
-                const dayElement = document.createElement('div');
-                dayElement.style.marginBottom = '15px';
-                dayElement.style.padding = '10px';
-                dayElement.style.background = 'rgba(255,255,255,0.1)';
-                dayElement.style.borderRadius = '10px';
-                dayElement.innerHTML = `
-                    <strong>${day}:</strong><br>
-                    ${dayOutfit.map(item => item.name).join(', ')}
-                `;
-                weekPlan.appendChild(dayElement);
-            });
-            
-            document.getElementById('outfitSuggestions').innerHTML = '';
-            document.getElementById('outfitSuggestions').appendChild(weekPlan);
-        };
-
-        function generateRandomOutfit() {
-            const tops = wardrobe.filter(item => item.category === 'tops');
-            const bottoms = wardrobe.filter(item => item.category === 'bottoms');
-            
-            const outfit = [];
-            if (tops.length > 0) outfit.push(tops[Math.floor(Math.random() * tops.length)]);
-            if (bottoms.length > 0) outfit.push(bottoms[Math.floor(Math.random() * bottoms.length)]);
-            
-            return outfit;
-        }
