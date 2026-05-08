@@ -1,20 +1,8 @@
-   //THINGS TO IMPLEMENT:
-   /*
-   1) Changed weather implementation - use a weather API to get real-time weather data based on user location.
-   2) Color harmony checker - implement a function to check if selected colors are complementary or clash.
-   3) Usage tracking and recommendations - track how often each item is worn and suggest items that haven't been worn recently.
-    4) Enhanced outfit generation with seasonal considerations - ensure outfits are appropriate for the current season.
-    5)
-   */
+//Work on :
+    //laundry and usage reminders are not working without set interval
 
 
-    //button hover effects are not consistent across all buttons
-    //the colors are ugly 
-    //the panel heights are still wrong - they are too short
-    //get outfit suggestions button is so ugly and huge
-   //color coordination section is dumb
-   //want a little box that shows  outfits in the seocnd panel
-   
+
 //implementing weather API - using OpenWeatherMap API
 async function getWeather() {
     const apiKey = '22fafa86b0906c75bb9cd83a592aa5a7';
@@ -27,41 +15,22 @@ async function getWeather() {
     
     return{
         temperature: data.main.temp,
-        condition: data.weather[0].main.toLowerCase()
+        condition: data.weather[0].main.toLowerCase(),
+        icon: data.weather[0].icon
     };
 
 }
 
 
-
-
-
-
-   
    // Wardrobe data storage
         let wardrobe = [];
         let nextId = 1;
 
-        // Color coordination rules
-        const colorCombinations = {
-            red: ['white', 'black', 'gray', 'blue'],
-            blue: ['white', 'gray', 'red', 'yellow'],
-            green: ['white', 'brown', 'gray', 'black'],
-            yellow: ['blue', 'gray', 'white', 'black'],
-            black: ['white', 'red', 'pink', 'yellow'],
-            white: ['black', 'blue', 'red', 'green'],
-            gray: ['white', 'black', 'red', 'blue'],
-            brown: ['white', 'green', 'yellow', 'orange'],
-            pink: ['white', 'black', 'gray', 'green'],
-            purple: ['white', 'yellow', 'gray', 'black'],
-            orange: ['blue', 'white', 'brown', 'black']
-        };
-
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
-            //loadWardrobe();
             setupEventListeners();
             updateStats();
+            displayWeatherSuggestions();
         });
 
         function setupEventListeners() {
@@ -105,31 +74,35 @@ async function getWeather() {
             handleFiles(e.target.files);
         }
 
-        function handleFiles(files) {
-            Array.from(files).forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        // Store the image data - in a real app, you'd upload to a server
-                        const imageData = e.target.result;
-                        // Auto-fill the form if it's empty
-                        if (!document.getElementById('itemName').value) {
-                            document.getElementById('itemName').value = file.name.split('.')[0];
-                        }
-                        // Store image for the next item to be added
-                        window.pendingImage = imageData;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
+function handleFiles(files) {
+    Array.from(files).forEach(file => {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageData = e.target.result;
+                window.pendingImage = imageData;
+
+        
+                const uploadSection = document.getElementById('uploadSection');
+                uploadSection.innerHTML = `
+                    <img src="${imageData}" style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+                    <p style="margin-top:8px; font-size:0.85rem; color:green;">✓ Image uploaded!</p>
+                    <p style="font-size:0.75rem; color:#888;">${file.name}</p>
+                `;
+            };
+            reader.readAsDataURL(file);
         }
+    });
+}
 
         function addClothingItem(e) {
             e.preventDefault();
+            const name = document.getElementById('itemName').value.trim() || 
+            `${color.charAt(0).toUpperCase() + color.slice(1)} ${category.charAt(0).toUpperCase() + category.slice(1)}`;
             
             const formData = {
                 id: nextId++,
-                name: document.getElementById('itemName').value,
+                name: name,
                 category: document.getElementById('category').value,
                 color: document.getElementById('color').value,
                 season: document.getElementById('season').value,
@@ -139,18 +112,24 @@ async function getWeather() {
                 wornCount: 0
             };
 
-            if (!formData.name || !formData.category || !formData.color || !formData.season) {
+            if (!formData.category || !formData.color || !formData.season) {
                 alert('Please fill in all fields');
                 return;
             }
 
             wardrobe.push(formData);
-            saveWardrobe();
             displayWardrobe();
             updateStats();
             
             // Reset form
             document.getElementById('clothingForm').reset();
+            document.getElementById('uploadSection').innerHTML = `
+                <div class="upload-icon">📁</div>
+                <p>Drag & Drop your clothing images here or click to upload</p>
+                <input type="file" id="fileInput" class="file-input" multiple accept="image/*">
+            `;
+            // re-attach the file input listener after resetting
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
             window.pendingImage = null;
         }
 
@@ -217,19 +196,21 @@ async function getWeather() {
             if (item) {
                 item.lastWorn = new Date();
                 item.wornCount++;
-                saveWardrobe();
                 displayWardrobe();
                 updateStats();
             }
         }
 
+
+        
         function deleteItem(id) {
             if (confirm('Are you sure you want to delete this item?')) {
                 wardrobe = wardrobe.filter(item => item.id !== id);
-                saveWardrobe();
                 displayWardrobe();
                 updateStats();
             }
+
+
         }
 
         function updateStats() {
@@ -242,8 +223,17 @@ async function getWeather() {
             document.getElementById('recentlyWorn').textContent = recentlyWorn;
         }
 
-        function generateOutfitSuggestion() {
+        async function generateOutfitSuggestion() {
+
+            
+
+
+
             const occasion = document.getElementById('occasion').value;
+            const priority = document.getElementById('priority').value;
+            const Weather = document.getElementById('weather-info');
+            const weatherText = Weather.dataset.weather || 'unknown';
+
             const availableItems = wardrobe.filter(item => {
                 // Don't suggest recently worn items
                 const recentlyWorn = item.lastWorn && 
@@ -251,65 +241,116 @@ async function getWeather() {
                 return !recentlyWorn;
             });
 
+
+
+            //not enough items to make outfit bruh
             if (availableItems.length < 2) {
                 document.getElementById('outfitSuggestions').innerHTML = 
                     '<p>Add more items to your wardrobe for better suggestions!</p>';
                 return;
             }
 
-            // Simple outfit generation logic
-            const tops = availableItems.filter(item => item.category === 'tops');
-            const bottoms = availableItems.filter(item => item.category === 'bottoms');
-            const outerwear = availableItems.filter(item => item.category === 'outerwear');
-            const shoes = availableItems.filter(item => item.category === 'shoes');
 
-            let outfit = [];
             
-            // Pick a top
-            if (tops.length > 0) {
-                const randomTop = tops[Math.floor(Math.random() * tops.length)];
-                outfit.push(randomTop);
-                
-                // Pick matching bottom
-                if (bottoms.length > 0) {
-                    const matchingBottoms = bottoms.filter(bottom => 
-                        colorCombinations[randomTop.color] && 
-                        colorCombinations[randomTop.color].includes(bottom.color)
-                    );
-                    
-                    const bottomsToChooseFrom = matchingBottoms.length > 0 ? matchingBottoms : bottoms;
-                    const randomBottom = bottomsToChooseFrom[Math.floor(Math.random() * bottomsToChooseFrom.length)];
-                    outfit.push(randomBottom);
-                }
-                
-                // Add outerwear for work/formal occasions
-                if ((occasion === 'work' || occasion === 'formal') && outerwear.length > 0) {
-                    const randomOuterwear = outerwear[Math.floor(Math.random() * outerwear.length)];
-                    outfit.push(randomOuterwear);
-                }
-                
-                // Add shoes
-                if (shoes.length > 0) {
-                    const randomShoes = shoes[Math.floor(Math.random() * shoes.length)];
-                    outfit.push(randomShoes);
-                }
-            }
 
-            // Display suggestion
-            const suggestionHTML = `
-                <div class="outfit-suggestion">
-                    <div class="outfit-items">
-                    <p>Suggested outfit!!</p>
-                        ${outfit.map(item => 
-                            `<div class="outfit-item">${item.name}<br><small>${item.category} • ${item.color}</small></div>`
-                        ).join('')}
+            //claude integration mayhaps - rough idea right now 
+            const currentMonth = new Date().getMonth();
+            let seasons = ['spring', 'summer', 'fall', 'winter'][Math.floor(currentMonth / 3)];
+            const currentSeason = seasons[currentMonth];
+
+
+            const prompt = buildPrompt({priority, occasion, currentSeason, weatherText});
+
+            const container = document.getElementById('outfitSuggestions');
+            container.innerHTML = '<p>Get excited...</p>';
+
+            const API_KEY = 'add_key_here';
+            try {
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`
+    },
+    body: JSON.stringify({
+        model: 'meta-llama/llama-3.1-8b-instruct',
+        messages: [{ role: 'user', content: prompt }]
+    })
+});
+const data = await response.json();
+console.log('Full response:', JSON.stringify(data));
+const text = data.choices[0].message.content;
+renderSuggestion(text, container);
+        
+    getUsageRecommendations();
+        checkLaundryReminders();
+
+        } catch (error) {
+    console.log('Full error:', error);
+    console.log('Error message:', error.message);
+    container.innerHTML = '<p>Sorry, try again later!</p>';
+}
+        
+
+        }
+            
+
+
+        function buildPrompt({priority, occasion, currentSeason, weatherText}) {
+            const Wardrobesum = wardrobe.map(item => `${item.name} (${item.category}, ${item.color}, ${item.season})`).join('\n');
+
+            const contextParts =[];
+            if (priority) contextParts.push(`Priority: ${priority}.`);
+            if (occasion) contextParts.push(`Occasion: ${occasion}.`);
+            if (currentSeason) contextParts.push(`Season: ${currentSeason}.`);
+            if (weatherText) contextParts.push(`Weather: ${weatherText}.`);
+
+            return `You are a fashion assistant(talk like gen z and keep it short). Based on the following wardrobe items:\n${Wardrobesum}\n\nContext: ${contextParts.join(' ')}\n\nSuggest a stylish outfit. Respond in exactly this format with no extra formatting:\nOUTFIT: item1, item2, item3\nWHY: your explanation here`;
+
+        }
+
+        function renderSuggestion(text, container) {
+            const outfit = text.match(/OUTFIT:\s*(.+)/);
+            const whyMatch = text.match(/WHY:\s*([\s\S]+)/);
+                
+            const pieces = outfit ? outfit[1].split(',').map(s => s.trim()) : [];
+            const why = whyMatch ? whyMatch[1].trim() : text;
+
+            const categoryEmoji = {
+                tops: '👕',
+                bottoms: '👖',
+                outerwear: '🧥',
+                shoes: '👟',
+            };
+
+            const items = pieces.map(name => {
+                const found = wardrobe.find(i => i.name.toLowerCase() === name.toLowerCase());
+                const emoji = found ? (categoryEmoji[found.category] || '👕') : '👕';
+                return `<div style="display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.08); border:1px solid rgba(0,0,0,0.1); border-radius:8px; padding:10px 14px;">
+                    <div style="width:50px; height:50px; border-radius:6px; overflow:hidden; flex-shrink:0; background:#f5f5f5; display:flex; align-items:center; justify-content:center; font-size:24px;">
+                        ${found?.image 
+                            ? `<img src="${found.image}" style="width:100%; height:100%; object-fit:cover;">` 
+                            : emoji}
                     </div>
+                    <div>
+                        ${found ? `<strong>${found.name}</strong><br><span style="font-size:0.8rem; color:#888;">${found.category} · ${found.color} · ${found.season}</span>` : `<strong>${name}</strong>`}
+                    </div>
+                </div>`;
+            }).join('');
+
+             container.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+                <p style="font-size:0.85rem; color:#888; margin:0;">Suggested outfit</p>
+                <div style="display:flex; flex-direction:column; gap:6px;">${items}</div>
+                <div style="border-left: 3px solid #a78bfa; padding-left: 12px; margin-top:6px; font-size:0.9rem; color:#555; line-height:1.5;">
+                    ${why}
+                </div>
                 </div>
             `;
+            }
 
-            document.getElementById('outfitSuggestions').innerHTML = suggestionHTML;
-        }
-        // Add some sample data for demonstration
+
+        // some random sample data 
         window.addSampleData = function() {
             const sampleItems = [
                 {
@@ -362,32 +403,39 @@ async function getWeather() {
             document.querySelector('.panel').appendChild(demoButton);
         }, 1000);
 
-        // Advanced outfit suggestions based on weather and occasion
-        function getWeatherBasedSuggestions(temperature, condition) {
-            let suggestions = [];
-            
-            if (temperature < 50) {
-                suggestions = wardrobe.filter(item => 
-                    item.category === 'outerwear' || 
-                    (item.season === 'winter' || item.season === 'all')
-                );
-            } else if (temperature > 80) {
-                suggestions = wardrobe.filter(item => 
-                    item.category === 'tops' && 
-                    (item.season === 'summer' || item.season === 'all') &&
-                    ['white', 'yellow', 'blue'].includes(item.color)
-                );
-            }
-            
-            return suggestions;
-        }
+
+
+        
+
+
+
+
+
 
         async function displayWeatherSuggestions() {
             const weather = await getWeather();
 
-            document.getElementById("weather-info").innerText =
-            '' + weather.temperature + '°F - ' + weather.condition.charAt(0).toUpperCase() + weather.condition.slice(1);
+            const text = `${weather.temperature}°F and ${weather.condition}`;
+
+            const el = document.getElementById('weather-info');
+
+             el.innerHTML = `
+        <img src="https://openweathermap.org/img/wn/${weather.icon}@2x.png" 
+             style="width:50px; vertical-align:middle;">
+        <span>${Math.round(weather.temperature)}°F — ${weather.condition}</span>
+    `;
+
+           // el.textContent = text;
+            el.dataset.weather = text;
         }
+
+
+
+
+
+
+
+
 
         // Color harmony checker
         function checkColorHarmony(color1, color2) {
@@ -448,14 +496,18 @@ async function getWeather() {
 
         // Laundry reminder system
         function checkLaundryReminders() {
+            const existing = document.getElementById('laundryReminder');
+            if (existing) existing.remove();
+           // reminder.id = 'laundryReminder';
             const frequentlyWorn = wardrobe.filter(item => 
                 item.lastWorn && 
                 (new Date() - new Date(item.lastWorn)) < (1 * 24 * 60 * 60 * 1000) && // worn yesterday
-                item.wornCount > 5
+                item.wornCount > 2
             );
             
             if (frequentlyWorn.length > 0) {
                 const reminder = document.createElement('div');
+                reminder.id = 'laundryReminder';
                 reminder.style.background = 'linear-gradient(135deg, #ffecd2, #fcb69f)';
                 reminder.style.padding = '15px';
                 reminder.style.borderRadius = '10px';
@@ -471,14 +523,6 @@ async function getWeather() {
                 );
             }
         }
-
-        // Initialize additional features
-        setInterval(() => {
-            checkLaundryReminders();
-            if (Math.random() < 0.3) { // 30% chance to show usage recommendations
-                getUsageRecommendations();
-            }
-        }, 30000); // Check every 30 seconds for demo purposes
 
         // Export wardrobe data
         window.exportWardrobe = function() {

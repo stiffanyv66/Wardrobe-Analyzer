@@ -1,20 +1,30 @@
      body {
             font-family: Arial, sans-serif; 
-            background-color: rgba(198, 148, 241, 0.666);
+            background-image: url('public/cheetah.jpg');
             color: #313030;
             line-height: 1.6;
 
         }
 
+        .footer {
+            align-items:center; 
+            justify-content:center; 
+            text-align: center;
+            color:#ede9e9; 
+            font-size:0.9rem
+        }
+
         .container {
             margin: 0 auto;
             padding: 5px;
+            width: 80%;
         }
 
         .header {
             text-align: center;
             margin-bottom: 0;
-            color: rgba(206, 127, 237, 0.666);
+            color: lightyellow;
+            opacity: 100%;
         }
 
         .header h1 {
@@ -25,13 +35,13 @@
 
         .header p {
             font-size: 1.2rem;
-            opacity: 0.9;
+            
         }
 
         .main-content {
             display: flex;
-  flex-direction: column; /* stack vertically */
-  gap: 20px; /* optional spacing */
+            flex-direction: column;
+            gap: 20px;
 
         }
 
@@ -44,8 +54,8 @@
             border: 1px solid rgba(255,255,255,0.2);
             height: 100%;
             display: flex;
-  flex-direction: column; /* stack vertically */
-  gap: 20px; /* optional spacing */
+            flex-direction: column; 
+            gap: 20px;
         }
 
         .panel h2 {
@@ -65,6 +75,7 @@
             transition: all 0.3s ease;
             cursor: pointer;
             background: linear-gradient(45deg, #f7fafc, #edf2f7);
+            height: 150px;
         }
 
         .upload-section:hover {
@@ -101,12 +112,14 @@
 
         .form-group input, .form-group select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 20px 15px;
             border: 2px solid #e2e8f0;
             border-radius: 10px;
             font-size: 1rem;
             transition: border-color 0.3s ease;
+            box-sizing: border-box;
         }
+
 
         .form-group input:focus, .form-group select:focus {
             outline: none;
@@ -362,4 +375,6 @@
   object-fit: cover;
   border-radius: 8px;
 }
+
+
         }
