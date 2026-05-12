@@ -68,7 +68,7 @@
         }
 
         .upload-section {
-            border: 3px dashed #cdb5e0;
+            border: 3px dashed gray;
             border-radius: 15px;
             padding: 40px 20px;
             text-align: center;
@@ -128,9 +128,9 @@
         }
 
         .btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
+            background: white;
+            color: black;
+            border: 2px solid black;
             padding: 12px 30px;
             border-radius: 25px;
             font-size: 1rem;
@@ -142,17 +142,17 @@
         }
 
         .btn:hover {
-            background: linear-gradient(135deg, #48bb78, #38a169);
-            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+            background: lightgray;
+            box-shadow: 0 5px 15px lightyellow;
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #48bb78, #38a169);
-            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+            background: white;
+            box-shadow: 0 5px 15px lightyellow;
         }
 
         .btn-secondary:hover {
-            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+            box-shadow: 0 8px 25px lightyellow;
         }
 
         .wardrobe-grid {
@@ -289,11 +289,11 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #e0e5e4, #cbbbf0);
+            background: linear-gradient(135deg, #e0e5e4, lightyellow);
             padding: 20px;
             border-radius: 15px;
             text-align: center;
-            color: white;
+            color: black;
             font-weight: 600;
         }
 
